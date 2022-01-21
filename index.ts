@@ -13,7 +13,7 @@ const client = new DiscordJS.Client({
 
 let scoreboard: any = {};
 let config: any = {};
-
+//const pinnedID = -1;
 
 client.on('ready', () => {
     loadConfigFromFile();
@@ -45,6 +45,15 @@ const loadConfigFromFile = () => {
                 client.channels.fetch(config.channelid);
                 setNotificationSchedule();
             }
+
+	    // if no daily scores pinned message ID, send a message and pin it
+	    //if (config.pinnedscoresid) {
+            //    pinnedID = config.pinnedscoreid
+	    //} else {
+                // make message
+		// get id
+		// save id to config
+		// set up daily update
         });
     } else {
         console.log('No config found - creating blank config');
@@ -156,7 +165,7 @@ const setNotificationSchedule = () => {
 
         if (config.channelid) {
             const dailyEmbed = generateScoreBoardEmbed('NEW WORDLE CHALLENGE');
-            (client.channels.cache.get(config.channelid) as TextChannel).send({ content: dailyEmbed.userListEmbed.replace(/\n/g, ' ') });
+            (client.channels.cache.get(config.channelid) as TextChannel).send({ content: dailyEmbed.userListEmbed.replace(/[\n@]/g, ' ') });
             (client.channels.cache.get(config.channelid) as TextChannel).send({ embeds: [dailyEmbed.embed] });
         }
     });
@@ -175,6 +184,7 @@ const generateScoreBoardEmbed = (title: string) => {
     }
     scoreArray = scoreArray.sort(sort2d);
 
+    let usr;
     let userListEmbed = '';
     let scoreListEmbed = '';
     let averageListEmbed = '';
@@ -186,7 +196,9 @@ const generateScoreBoardEmbed = (title: string) => {
     let topScore = -1;
     let maxTopPlayers = 1;
     for (const entry of scoreArray) {
-        userListEmbed += `${client.users.cache.get(entry[0])}\n`;
+        usr = client.users.cache.get(entry[0]);
+        userListEmbed += `${usr?.username ?? usr}\n`;
+
 
         // get top 3 places
         if (topScoreCount < maxTopPlayers) {
@@ -255,7 +267,7 @@ client.on('messageCreate', (message) => {
     const isAdmin = message.member?.permissions.has("ADMINISTRATOR");
 
     // Check for Wordle Score
-    const wordleRegex = /Wordle \d{3} ([\dX])\/6\n{0,2}[⬛🟩🟨⬜]{5}/;
+    const wordleRegex = /Wordle \d{3} ([\dX])\/6\*?\n{0,2}[⬛🟩🟨⬜🟧🟦]{5}/;
     const wordleMessage = message.content.match(wordleRegex);
 
     if (wordleMessage) {
@@ -272,9 +284,51 @@ client.on('messageCreate', (message) => {
         const updatedScore = updateScoreBoardScore(message.author.id, wordleScore, true);
 
         // reply with score
-        message.reply({
-            content: `${wordleScore} points for ${message.author} (${updatedScore[0]} total pts, ${updatedScore[1]} attempts)`
-        })
+        //message.reply({
+        //    content: `${wordleScore} points for ${message.author} (${updatedScore[0]} total pts, ${updatedScore[1]} attempts)`
+        //})
+
+        switch(wordleScore) {
+            case 0: { // React with society
+                message.react('818343891421495296');
+                message.react('0️⃣');
+                break;
+            }
+            case 1: {
+                message.react('1️⃣');
+                message.react('922160964147752960');
+                break;
+            }
+            case 2: { // React with thicc
+                message.react('922160964147752960');
+                message.react('2️⃣');
+                break;
+            }
+            case 3: {
+                message.react('3️⃣');
+                message.react('922159771459665990');
+                break;
+            }
+            case 4: { // React with nathanChamp
+                message.react('839029215230951425');
+                message.react('4️⃣');
+                break;
+            }
+            case 5: {
+                message.react('5️⃣');
+                message.react('839029215230951425');
+                break;
+            }
+            case 6: { // React with bigBrain
+                message.react('887391310321963040');
+                message.react('6️⃣');
+                break;
+            }
+        }
+            
+
+	// update message showing daily scores
+	//updateDailyScoresPin(updatedScore)
 
     }
 
@@ -289,7 +343,7 @@ client.on('messageCreate', (message) => {
         const randomQuote = require('random-lotr-movie-quote');
         // console.log(randomQuote());
         message.channel.send({ content: `${randomQuote().char}: ${randomQuote().dialog}` });
-        message.delete();
+        //message.delete();
     }
 
 
