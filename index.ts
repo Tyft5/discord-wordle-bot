@@ -165,7 +165,7 @@ const setNotificationSchedule = () => {
 
         if (config.channelid) {
             const dailyEmbed = generateScoreBoardEmbed('NEW WORDLE CHALLENGE');
-            (client.channels.cache.get(config.channelid) as TextChannel).send({ content: dailyEmbed.userListEmbed.replace(/[\n@]/g, ' ') });
+            //(client.channels.cache.get(config.channelid) as TextChannel).send({ content: dailyEmbed.userListEmbed.replace(/[\n@]/g, ' ') });
             (client.channels.cache.get(config.channelid) as TextChannel).send({ embeds: [dailyEmbed.embed] });
         }
     });
